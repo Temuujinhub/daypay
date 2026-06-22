@@ -23,9 +23,11 @@ async function bootstrap(): Promise<void> {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup("docs", app, document);
 
-  const port = Number(process.env.API_PORT ?? 3000);
-  await app.listen(port);
-  new Logger("Bootstrap").log(`DayPay API listening on http://localhost:${port} (docs: /docs)`);
+  // Cloud platforms (Railway/Render) inject PORT; bind to 0.0.0.0 so the
+  // container is reachable.
+  const port = Number(process.env.PORT ?? process.env.API_PORT ?? 3000);
+  await app.listen(port, "0.0.0.0");
+  new Logger("Bootstrap").log(`DayPay API listening on port ${port} (docs: /docs)`);
 }
 
 void bootstrap();
