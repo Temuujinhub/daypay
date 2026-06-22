@@ -1,27 +1,44 @@
+import type { ProfileResponse } from "@daypay/contracts";
 import { Ionicons } from "@expo/vector-icons";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Card } from "../../components/ui";
-import { user } from "../../lib/data";
-import { colors, radius } from "../../lib/theme";
-
-const ROWS: { icon: keyof typeof Ionicons.glyphMap; label: string; danger?: boolean }[] = [
-  { icon: "lock-closed-outline", label: "Login Info" },
-  { icon: "person-outline", label: "Personal Details" },
-  { icon: "card-outline", label: "Payment Method" },
-  { icon: "log-out-outline", label: "Logout", danger: true },
-];
+import { fetchProfile } from "../../lib/data";
+import { useSession } from "../../lib/session";
+import { colors } from "../../lib/theme";
 
 export default function AccountScreen() {
+  const { signOut } = useSession();
+  const [profile, setProfile] = useState<ProfileResponse | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      fetchProfile().then((p) => active && setProfile(p));
+      return () => {
+        active = false;
+      };
+    }, []),
+  );
+
+  const rows: { icon: keyof typeof Ionicons.glyphMap; label: string; onPress?: () => void; danger?: boolean }[] = [
+    { icon: "lock-closed-outline", label: "Login Info" },
+    { icon: "person-outline", label: "Personal Details" },
+    { icon: "card-outline", label: "Payment Method" },
+    { icon: "log-out-outline", label: "Logout", danger: true, onPress: () => void signOut() },
+  ];
+
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>Account</Text>
 
         <Card style={styles.profile}>
-          <Text style={styles.name}>{user.fullName}</Text>
-          <Text style={styles.email}>{user.email}</Text>
-          {user.kycVerified && (
+          <Text style={styles.name}>{profile?.fullName ?? "—"}</Text>
+          <Text style={styles.email}>{profile?.email ?? profile?.phoneNumber ?? ""}</Text>
+          {profile?.kycVerified && (
             <View style={styles.kyc}>
               <Ionicons name="checkmark-circle" size={16} color={colors.green} />
               <Text style={styles.kycText}>KYC Verified</Text>
@@ -31,14 +48,14 @@ export default function AccountScreen() {
 
         <Text style={styles.section}>ACCOUNT</Text>
         <Card style={styles.list}>
-          {ROWS.map((r, i) => (
+          {rows.map((r, i) => (
             <View key={r.label}>
               {i > 0 && <View style={styles.divider} />}
-              <View style={styles.row}>
+              <Pressable style={styles.row} onPress={r.onPress}>
                 <Ionicons name={r.icon} size={20} color={r.danger ? colors.danger : colors.text} />
                 <Text style={[styles.rowLabel, r.danger && { color: colors.danger }]}>{r.label}</Text>
                 <Ionicons name="chevron-forward" size={18} color={colors.muted} />
-              </View>
+              </Pressable>
             </View>
           ))}
         </Card>

@@ -1,30 +1,55 @@
+import { calculateLoan } from "@daypay/contracts";
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
-import { calculateLoan } from "@daypay/contracts";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Card } from "../../components/ui";
-import { getProduct } from "../../lib/data";
+import { applyForLoan, getProduct } from "../../lib/data";
 import { aed, colors, radius } from "../../lib/theme";
 
 export default function ProductScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const product = getProduct(String(id));
 
-  const [amount, setAmount] = useState(product ? Math.round((product.minAmount + product.maxAmount) / 2 / 1000) * 1000 : 50000);
+  const [amount, setAmount] = useState(
+    product ? Math.round((product.minAmount + product.maxAmount) / 2 / 1000) * 1000 : 50000,
+  );
   const [term, setTerm] = useState(product?.terms[1] ?? 12);
+  const [submitting, setSubmitting] = useState(false);
 
   if (!product) {
     return (
-      <SafeAreaView style={styles.safe}>
+      <View style={styles.safe}>
         <Text style={{ padding: 20 }}>Product not found.</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   const result = calculateLoan({ amount, termMonths: term, apr: product.minApr });
+
+  async function apply() {
+    setSubmitting(true);
+    try {
+      const res = await applyForLoan({ productCode: product!.code, amount, termMonths: term });
+      if (!res) {
+        Alert.alert("Demo mode", "Connect a backend (EXPO_PUBLIC_API_URL) to submit a real application.");
+        return;
+      }
+      if (res.status === "rejected") {
+        Alert.alert("Not approved", res.eligibility?.reasons.join("\n") || "You are not eligible.");
+      } else {
+        Alert.alert("Approved!", `Your ${product!.name} for ${aed(amount)} was approved.`, [
+          { text: "View my loans", onPress: () => router.replace("/(tabs)/usages") },
+        ]);
+      }
+    } catch (e) {
+      Alert.alert("Error", e instanceof Error ? e.message : "Application failed");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <View style={styles.safe}>
@@ -80,9 +105,15 @@ export default function ProductScreen() {
           </View>
         </Card>
 
-        <Pressable style={styles.applyBtn}>
-          <Text style={styles.applyText}>Apply Now</Text>
-          <Ionicons name="arrow-forward" size={18} color="#fff" />
+        <Pressable style={[styles.applyBtn, submitting && { opacity: 0.6 }]} disabled={submitting} onPress={apply}>
+          {submitting ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <>
+              <Text style={styles.applyText}>Apply Now</Text>
+              <Ionicons name="arrow-forward" size={18} color="#fff" />
+            </>
+          )}
         </Pressable>
       </ScrollView>
     </View>
@@ -102,15 +133,7 @@ const styles = StyleSheet.create({
   rangeRow: { flexDirection: "row", justifyContent: "space-between" },
   range: { color: colors.muted, fontSize: 12 },
   terms: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 10 },
-  term: {
-    width: "22%",
-    minWidth: 70,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingVertical: 12,
-    alignItems: "center",
-  },
+  term: { width: "22%", minWidth: 70, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, paddingVertical: 12, alignItems: "center" },
   termActive: { borderColor: colors.brand, backgroundColor: colors.chipBg },
   termNum: { fontSize: 16, fontWeight: "800", color: colors.text },
   termUnit: { fontSize: 11, color: colors.muted, marginTop: 2 },
@@ -119,15 +142,6 @@ const styles = StyleSheet.create({
   resultLabel: { color: colors.brandDark, fontSize: 13 },
   resultAmount: { color: colors.brandDark, fontSize: 30, fontWeight: "800", marginVertical: 4 },
   resultMeta: { color: colors.brandDark, fontSize: 12 },
-  applyBtn: {
-    backgroundColor: colors.ink,
-    borderRadius: 999,
-    paddingVertical: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    marginTop: 18,
-  },
+  applyBtn: { backgroundColor: colors.ink, borderRadius: 999, paddingVertical: 16, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 18 },
   applyText: { color: "#fff", fontWeight: "700", fontSize: 15 },
 });
