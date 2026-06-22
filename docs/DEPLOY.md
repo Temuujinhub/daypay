@@ -53,12 +53,33 @@
    - Эсвэл шинэ дугаараар бүртгүүлж, **KYC submit** хийгээд (mock auto-verify)
      зээлийн бүтээгдэхүүн рүү **Apply** хийвэл жинхэнэ зээл үүснэ.
 
-## 3. Орчны хувьсагч (товч)
+## 3. Admin / Lender веб портал (Vercel)
+
+`apps/web` нь ажилтны портал: **dashboard, applications, loans, users, KYC queue,
+sandbox report** (super_admin/mlro) ба **decision queue + portfolio** (lender_admin).
+
+1. Vercel project → **Settings → Environment Variables**:
+   | Нэр | Утга |
+   |---|---|
+   | `NEXT_PUBLIC_API_URL` | Railway backend-ийн домэйн (жнь `https://daypay-production.up.railway.app`) |
+   - Тохируулаагүй бол default нь production Railway URL руу заана.
+2. **Root Directory** = `apps/web` (зайгүй) — өмнө тохируулсан.
+3. Redeploy. Портал нээгдээд **Login** дэлгэц гарна (OTP, mock).
+4. Sandbox нэвтрэх данс (OTP-г Railway Deploy Logs-д `[mock-sms]` гэж харагдана):
+   - **Admin:** `+971500000000` → бүх удирдлага + KYC + sandbox тайлан.
+   - **Lender:** `+971500000002` → зөвхөн өөрийн байгууллагын өргөдөл + portfolio.
+   - Энгийн зээлдэгч (`role=user`) портал руу нэвтрэхгүй — мобайл апп ашиглана.
+
+> RBAC: admin endpoint-ууд `super_admin`/`mlro`-д, lender endpoint-ууд `lender_admin`-д
+> л нээлттэй (backend дээр `RolesGuard`-аар хамгаалагдсан, 403 буцаана).
+
+## 4. Орчны хувьсагч (товч)
 
 - Backend: `DATABASE_URL`, `JWT_*`, `SANDBOX_MODE`, `INTEGRATIONS_MODE`, `NODE_ENV` (PORT auto).
+- Web: `NEXT_PUBLIC_API_URL` (тохируулаагүй → default Railway URL).
 - Mobile: `EXPO_PUBLIC_API_URL` (хоосон → DEMO mock mode; тохирсон → бодит backend).
 
-## 4. Дараа нь (production-д)
+## 5. Дараа нь (production-д)
 
 - Бодит интеграци: `INTEGRATIONS_MODE=live` + UAEID/AECB/SMS/банк түлхүүрүүд (адаптер ард).
 - Дата байршил: PDPL-ийн дагуу UAE бүс (AWS me-central-1) руу шилжих.
