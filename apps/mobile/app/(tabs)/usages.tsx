@@ -1,0 +1,71 @@
+import { Ionicons } from "@expo/vector-icons";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Card, Pill } from "../../components/ui";
+import { activeLoans } from "../../lib/data";
+import { aed, colors } from "../../lib/theme";
+
+export default function UsagesScreen() {
+  return (
+    <SafeAreaView style={styles.safe} edges={["top"]}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <Text style={styles.title}>My Loans</Text>
+
+        {activeLoans.map((loan) => {
+          const progress = loan.paymentNo / loan.paymentsTotal;
+          return (
+            <Card key={loan.id} style={styles.card}>
+              <View style={styles.row}>
+                <Text style={styles.product}>{loan.productName}</Text>
+                <Pill label="Active" tone="green" />
+              </View>
+              <Text style={styles.loanNo}>{loan.id}</Text>
+
+              <View style={styles.amounts}>
+                <View>
+                  <Text style={styles.k}>Outstanding</Text>
+                  <Text style={styles.v}>{aed(loan.outstanding)}</Text>
+                </View>
+                <View style={{ alignItems: "flex-end" }}>
+                  <Text style={styles.k}>Next payment</Text>
+                  <Text style={styles.v}>{aed(loan.nextPaymentAmount)}</Text>
+                </View>
+              </View>
+
+              <View style={styles.progressTrack}>
+                <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+              </View>
+              <View style={styles.row}>
+                <Text style={styles.k}>
+                  Payment {loan.paymentNo} of {loan.paymentsTotal}
+                </Text>
+                <Text style={styles.k}>{loan.apr}% APR</Text>
+              </View>
+
+              <View style={styles.due}>
+                <Ionicons name="calendar-outline" size={14} color={colors.muted} />
+                <Text style={styles.k}>Due {loan.dueDateLabel}</Text>
+              </View>
+            </Card>
+          );
+        })}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.bg },
+  content: { padding: 16, paddingBottom: 32 },
+  title: { fontSize: 26, fontWeight: "800", color: colors.text, marginBottom: 16 },
+  card: { gap: 10, marginBottom: 14 },
+  row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  product: { fontSize: 17, fontWeight: "800", color: colors.text },
+  loanNo: { color: colors.muted, fontSize: 12, marginTop: -4 },
+  amounts: { flexDirection: "row", justifyContent: "space-between", marginTop: 4 },
+  k: { color: colors.muted, fontSize: 13 },
+  v: { color: colors.text, fontSize: 17, fontWeight: "700", marginTop: 2 },
+  progressTrack: { height: 8, borderRadius: 999, backgroundColor: colors.border, overflow: "hidden", marginTop: 4 },
+  progressFill: { height: 8, borderRadius: 999, backgroundColor: colors.brand },
+  due: { flexDirection: "row", alignItems: "center", gap: 6 },
+});
