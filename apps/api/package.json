@@ -6,6 +6,7 @@
     "build": "nest build",
     "dev": "nest start --watch",
     "start": "node dist/main",
+    "start:prod": "prisma migrate deploy && (prisma db seed || true) && node dist/main",
     "typecheck": "tsc --noEmit",
     "test": "echo \"(no api tests yet)\"",
     "prisma:generate": "prisma generate",
