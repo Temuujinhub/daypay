@@ -31,8 +31,10 @@ jobs:
       - name: Generate Prisma client
         run: pnpm --filter @daypay/api exec prisma generate
 
-      - name: Typecheck
-        run: pnpm typecheck
-
+      # Build first: Next.js generates .next/types referenced by next-env.d.ts,
+      # which the web typecheck needs on a fresh checkout.
       - name: Build
         run: pnpm build
+
+      - name: Typecheck
+        run: pnpm typecheck
