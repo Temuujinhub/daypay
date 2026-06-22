@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Stack } from "expo-router";
 import { calculateLoan } from "@daypay/contracts";
 
 const TERMS = [6, 9, 12, 18, 24, 36];
@@ -15,7 +14,6 @@ export default function CalculatorScreen() {
 
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ title: "Loan calculator" }} />
       <Text style={styles.heading}>DayPay</Text>
       <Text style={styles.sub}>
         Same calculateLoan() as the API &amp; web — from @daypay/contracts.
@@ -69,7 +67,7 @@ function Stat({ label, value }: { label: string; value: number }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, gap: 12, backgroundColor: "#fff" },
+  container: { flex: 1, paddingTop: 64, paddingHorizontal: 20, paddingBottom: 20, gap: 12, backgroundColor: "#fff" },
   heading: { fontSize: 32, fontWeight: "700", color: BRAND },
   sub: { color: "#64748b", marginBottom: 8 },
   label: { fontWeight: "600", marginTop: 8 },
