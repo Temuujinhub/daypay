@@ -3,6 +3,7 @@ import { ConfigModule } from "@nestjs/config";
 import { PrismaModule } from "./common/prisma/prisma.module";
 import { HealthModule } from "./modules/health/health.module";
 import { AuthModule } from "./modules/auth/auth.module";
+import { AccountModule } from "./modules/account/account.module";
 import { KycModule } from "./modules/kyc/kyc.module";
 import { LoanModule } from "./modules/loan/loan.module";
 import { PaymentModule } from "./modules/payment/payment.module";
@@ -19,6 +20,7 @@ import { AdminModule } from "./modules/admin/admin.module";
     PrismaModule,
     HealthModule,
     AuthModule,
+    AccountModule,
     KycModule,
     LoanModule,
     PaymentModule,

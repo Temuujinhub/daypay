@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { LoanCalculatorRequest } from "@daypay/contracts";
 import { ZodValidationPipe } from "../../common/pipes/zod-validation.pipe";
@@ -22,5 +22,11 @@ export class LoanController {
   @ApiOperation({ summary: "Calculate monthly payment / total interest" })
   calculate(@Body(new ZodValidationPipe(LoanCalculatorRequest)) dto: LoanCalculatorRequest) {
     return this.loan.calculate(dto);
+  }
+
+  @Get(":code")
+  @ApiOperation({ summary: "Loan product detail" })
+  get(@Param("code") code: string) {
+    return this.loan.getProduct(code);
   }
 }
