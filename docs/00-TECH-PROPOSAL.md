@@ -177,4 +177,10 @@ daypay/
 
 ---
 
-*Энэ нь санал. Баталгаажсаны дараа дараагийн алхам нь §7-ийн "Үе 0: Foundation"-ийг scaffold хийх явдал.*
+---
+
+## 9. Статус шинэчлэл (2026-06)
+
+**Үе 0 (Foundation) — БЭЛЭН ✅.** Стек баталгаажиж, monorepo + 3 апп + shared contracts босгож, backend-ийг бодит Postgres дээр end-to-end туршив (register → OTP verify → JWT → loan-products → calculate → session). turbo build 3/3, typecheck 5/5 ногоон. CI тохируулсан.
+
+**Дараагийн алхам — Үе 1 (Auth + KYC босоо зүсэлт):** мобайл дээр OTP бүртгэл + биометр, Emirates ID + selfie урсгал (mock KYC адаптер), нүүр хуудас. Бодит дэлгэцүүдийг утсан дээр Expo Go-оор турших.
