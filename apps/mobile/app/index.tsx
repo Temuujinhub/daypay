@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { calculateLoan } from "@daypay/contracts";
 
 const TERMS = [6, 9, 12, 18, 24, 36];
 const BRAND = "#00A896";
 
-export default function CalculatorScreen() {
+export default function HomeScreen() {
   const [amount, setAmount] = useState(16000);
   const [term, setTerm] = useState(12);
   const apr = 18;
@@ -13,10 +13,10 @@ export default function CalculatorScreen() {
   const result = calculateLoan({ amount, termMonths: term, apr });
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.heading}>DayPay</Text>
       <Text style={styles.sub}>
-        Same calculateLoan() as the API &amp; web — from @daypay/contracts.
+        Loan calculator — same calculateLoan() as the API &amp; web (@daypay/contracts).
       </Text>
 
       <Text style={styles.label}>Amount: AED {amount.toLocaleString()}</Text>
@@ -43,7 +43,7 @@ export default function CalculatorScreen() {
         <Stat label="Total interest" value={result.totalInterest} />
         <Stat label="Total payable" value={result.totalPayable} />
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -67,7 +67,7 @@ function Stat({ label, value }: { label: string; value: number }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 64, paddingHorizontal: 20, paddingBottom: 20, gap: 12, backgroundColor: "#fff" },
+  container: { paddingTop: 72, paddingHorizontal: 20, paddingBottom: 40, gap: 12, backgroundColor: "#fff" },
   heading: { fontSize: 32, fontWeight: "700", color: BRAND },
   sub: { color: "#64748b", marginBottom: 8 },
   label: { fontWeight: "600", marginTop: 8 },
