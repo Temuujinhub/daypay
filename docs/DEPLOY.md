@@ -2,6 +2,13 @@
 
 Энэ заавар нь backend-ийг үүлэн дээр deploy хийж, мобайл аппыг **бодит дата + жинхэнэ нэвтрэлт**-руу холбоно. (Локалд Postgres суулгахаас илүү найдвартай, ямар ч сүлжээнээс ажиллана.)
 
+> ## ⚠️ Хамгийн чухал — юуг хаана deploy хийх вэ
+> - **Web (apps/web)** → зөвхөн **Vercel** (аль хэдийн ажиллаж байгаа). Railway дээр web хэрэггүй.
+> - **Mobile (apps/mobile)** → **хаана ч deploy хийхгүй** — энэ нь утсан дээр Expo Go/build-ээр ажилладаг. Railway дээр mobile хэрэггүй.
+> - **Backend (apps/api)** → **зөвхөн ҮҮНИЙГ** Railway-д deploy хийнэ, **PostgreSQL-тэй НЭГ project дотор**.
+>
+> Railway repo-г холбоход 3 service (api/web/mobile) автоматаар үүсгэж магадгүй — **web ба mobile service-ийг устга**, зөвхөн **api**-г үлдээ. Postgres нь api-тай **ижил project**-д байх ёстой, эс бөгөөс `DATABASE_URL` холбогдохгүй (localhost → crash).
+
 ## 1. Backend-ийг Railway-д deploy хийх
 
 1. https://railway.app → GitHub-аар бүртгүүл/нэвтэр.
