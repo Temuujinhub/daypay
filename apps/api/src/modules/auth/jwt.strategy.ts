@@ -7,11 +7,13 @@ import type { UserRole } from "@daypay/contracts";
 export interface JwtPayload {
   sub: string;
   role: UserRole;
+  lenderId?: string | null;
 }
 
 export interface AuthenticatedUser {
   userId: string;
   role: UserRole;
+  lenderId?: string | null;
 }
 
 @Injectable()
@@ -32,6 +34,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!payload?.sub) {
       throw new UnauthorizedException();
     }
-    return { userId: payload.sub, role: payload.role };
+    return { userId: payload.sub, role: payload.role, lenderId: payload.lenderId ?? null };
   }
 }

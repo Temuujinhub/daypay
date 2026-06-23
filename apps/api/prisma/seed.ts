@@ -177,7 +177,111 @@ async function main() {
     });
   }
 
-  console.log("Seed complete: products, lender offerings, sandbox config, demo user + active loan.");
+  // ── Portal accounts: super admin + lender admin ──
+  await prisma.user.upsert({
+    where: { phoneNumber: "+971500000000" },
+    update: { role: "super_admin", fullName: "DayPay Admin" },
+    create: {
+      phoneNumber: "+971500000000",
+      phoneVerified: true,
+      email: "admin@daypay.ae",
+      fullName: "DayPay Admin",
+      kycStatus: "verified",
+      role: "super_admin",
+      isSandboxUser: true,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { phoneNumber: "+971500000002" },
+    update: { role: "lender_admin", lenderId: lender.id, fullName: "Al Nahda Operations" },
+    create: {
+      phoneNumber: "+971500000002",
+      phoneVerified: true,
+      email: "ops@alnahda.ae",
+      fullName: "Al Nahda Operations",
+      kycStatus: "verified",
+      role: "lender_admin",
+      lenderId: lender.id,
+      isSandboxUser: true,
+    },
+  });
+
+  // ── Borrower awaiting KYC review (populates admin KYC queue) ──
+  const pendingKyc = await prisma.user.upsert({
+    where: { phoneNumber: "+971500000003" },
+    update: {},
+    create: {
+      phoneNumber: "+971500000003",
+      phoneVerified: true,
+      email: "bat@example.com",
+      fullName: "Bat Munkh",
+      kycStatus: "in_review",
+      preferredLanguage: "en",
+      isSandboxUser: true,
+    },
+  });
+  await prisma.kycProfile.upsert({
+    where: { userId: pendingKyc.id },
+    update: {},
+    create: {
+      userId: pendingKyc.id,
+      emiratesIdNumber: "784-1992-7654321-2",
+      fullNameEn: "Bat Munkh",
+      nationality: "MNG",
+      biometricMatchScore: 92,
+      amlScreeningResult: "clear",
+      amlScreeningDate: new Date(),
+    },
+  });
+
+  // ── Verified borrower with an application awaiting a lender decision ──
+  const applicant = await prisma.user.upsert({
+    where: { phoneNumber: "+971500000004" },
+    update: {},
+    create: {
+      phoneNumber: "+971500000004",
+      phoneVerified: true,
+      email: "sara@example.com",
+      fullName: "Sara Ahmed",
+      kycStatus: "verified",
+      creditScore: 705,
+      creditLimit: 40000,
+      availableCredit: 40000,
+      preferredLanguage: "en",
+      isSandboxUser: true,
+    },
+  });
+  const pendingApp = await prisma.loanApplication.findUnique({
+    where: { applicationNumber: "APP-DEMO-0002" },
+  });
+  if (!pendingApp) {
+    const product = await prisma.loanProduct.findUniqueOrThrow({ where: { productCode: "standard_rental" } });
+    const lp = await prisma.lenderProduct.findFirstOrThrow({ where: { loanProductId: product.id, lenderId: lender.id } });
+    await prisma.loanApplication.create({
+      data: {
+        applicationNumber: "APP-DEMO-0002",
+        userId: applicant.id,
+        lenderProductId: lp.id,
+        loanProductId: product.id,
+        lenderId: lender.id,
+        requestedAmount: 25000,
+        requestedTerm: 18,
+        purpose: "Annual rent financing",
+        status: "under_review",
+        eligibilityPassed: true,
+        creditScoreAtApp: 705,
+        submittedAt: new Date(),
+        sandboxFlag: true,
+      },
+    });
+  }
+
+  console.log(
+    "Seed complete: products, lender offerings, sandbox config, demo borrower + active loan,\n" +
+      "  super_admin (+971500000000), lender_admin (+971500000002), KYC-queue user (+971500000003),\n" +
+      "  and a pending application from Sara Ahmed (+971500000004).",
+  );
 }
 
 main()

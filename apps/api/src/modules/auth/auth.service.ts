@@ -93,7 +93,7 @@ export class AuthService {
       data: { phoneVerified: true, lastLoginAt: new Date() },
     });
 
-    return this.issueTokens({ sub: user.id, role: "user" });
+    return this.issueTokens({ sub: user.id, role: user.role, lenderId: user.lenderId });
   }
 
   async refresh(refreshToken: string): Promise<AuthTokens> {
@@ -101,7 +101,7 @@ export class AuthService {
       const payload = await this.jwt.verifyAsync<JwtPayload>(refreshToken, {
         secret: this.config.getOrThrow<string>("JWT_REFRESH_SECRET"),
       });
-      return this.issueTokens({ sub: payload.sub, role: payload.role });
+      return this.issueTokens({ sub: payload.sub, role: payload.role, lenderId: payload.lenderId });
     } catch {
       throw new UnauthorizedException({
         code: ErrorCode.UNAUTHORIZED,

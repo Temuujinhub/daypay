@@ -19,6 +19,13 @@ enum KycStatus {
   rejected
 }
 
+enum UserRole {
+  user
+  lender_admin
+  super_admin
+  mlro
+}
+
 enum PreferredLanguage {
   en
   hi
@@ -119,6 +126,8 @@ model User {
   preferredLanguage PreferredLanguage @default(en) @map("preferred_language")
   isActive          Boolean           @default(true) @map("is_active")
   isSandboxUser     Boolean           @default(false) @map("is_sandbox_user")
+  role              UserRole          @default(user)
+  lenderId          String?           @map("lender_id") @db.Uuid
   createdAt         DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
   lastLoginAt       DateTime?         @map("last_login_at") @db.Timestamptz(6)
